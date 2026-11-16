@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blind Bench</title>
+<style>
+  :root {
+    --bg: #121212; --surface: #1c1c1c; --line: #2c2c2c; --ink: #ececec; --muted: #9a9a9a;
+    --accent: #f2b8c6; --accent-ink: #2a1219; --warn: #f0c36a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  button { font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  button:hover { border-color: #555; }
+  button:disabled { opacity: .4; cursor: default; }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  header { position: sticky; top: 0; z-index: 5; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 12px 16px; background: rgba(18,18,18,.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 15px; margin: 0 auto 0 0; font-weight: 600; }
+  .dots { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); cursor: pointer; border: 0; padding: 0; }
+  .dot.done { background: var(--accent); }
+  .dot.cur { outline: 2px solid var(--ink); outline-offset: 2px; }
+  main { max-width: 1500px; margin: 0 auto; padding: 20px 16px 80px; }
+  .brief { display: grid; grid-template-columns: minmax(200px, 340px) 1fr; gap: 20px; align-items: start; margin-bottom: 24px; }
+  .brief img { width: 100%; border-radius: 10px; display: block; cursor: zoom-in; }
+  .label { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 6px; }
+  .prompt { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; white-space: pre-wrap; color: #cfcfcf; max-height: 260px; overflow: auto; }
+  .help { color: var(--muted); font-size: 13px; margin-top: 10px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 2px solid transparent; border-radius: 12px; overflow: hidden; position: relative; }
+  .card.ranked { border-color: var(--accent); }
+  .card img { width: 100%; display: block; cursor: zoom-in; background: #000; }
+  .badge { position: absolute; top: 10px; left: 10px; min-width: 34px; height: 34px; padding: 0 8px; border-radius: 17px; display: grid; place-items: center; background: rgba(0,0,0,.65); font-weight: 700; }
+  .card.ranked .badge { background: var(--accent); color: var(--accent-ink); }
+  .ai { position: absolute; top: 10px; right: 10px; background: var(--warn); color: #2b1d00; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+  .bar { display: flex; gap: 8px; padding: 10px; }
+  .bar button { flex: 1; padding: 8px 6px; }
+  .bar button.on { background: var(--warn); color: #2b1d00; border-color: var(--warn); }
+  textarea { width: 100%; margin-top: 20px; min-height: 64px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: inherit; }
+  .lb { position: fixed; inset: 0; z-index: 20; background: rgba(0,0,0,.95); display: none; flex-direction: column; }
+  .lb.open { display: flex; }
+  .lb-top { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; color: var(--muted); font-size: 13px; gap: 12px; }
+  .lb-top strong { color: var(--ink); font-size: 16px; }
+  .lb-img { flex: 1; overflow: auto; display: grid; place-items: center; cursor: zoom-in; }
+  .lb-img img { max-width: 100%; max-height: calc(100vh - 60px); object-fit: contain; }
+  .lb-img.zoom { place-items: start; cursor: zoom-out; }
+  .lb-img.zoom img { max-width: none; max-height: none; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 28px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 500; font-size: 13px; }
+  tr.top td { color: var(--accent); font-weight: 600; }
+  .hidden { display: none !important; }
+  @media (max-width: 700px) { .brief { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">Blind Bench</h1>
+  <div class="dots" id="dots"></div>
+  <button id="prev">← Previous</button>
+  <button id="next">Next →</button>
+  <button id="reveal" class="primary" disabled>Reveal results</button>
+</header>
+
+<main id="evalView">
+  <section class="brief">
+    <div>
+      <p class="label">Original</p>
+      <img id="orig" alt="Original photo">
+    </div>
+    <div>
+      <p class="label">What was asked</p>
+      <div class="prompt" id="prompt"></div>
+      <p class="help">Rank from <b>best to worst</b>: click "Pick" or press the letter key. Click again to remove it.
+        "Looks AI" flags the ones that read as a render. Click an image to view it large: ← → switches, hold <b>space</b> to see the original, click for 100% zoom.</p>
+      <button id="resetCase">Reset this case</button>
+    </div>
+  </section>
+  <div class="grid" id="grid"></div>
+  <textarea id="note" placeholder="Notes for this case (optional): what worked, what failed…"></textarea>
+</main>
+
+<main id="resultView" class="hidden">
+  <p class="label">Ranking global</p>
+  <table id="summary"></table>
+  <p class="label">Per case</p>
+  <div id="perCase"></div>
+  <button id="download" class="primary">Download results.json</button>
+  <button id="back">Back to rating</button>
+</main>
+
+<div class="lb" id="lb">
+  <div class="lb-top"><strong id="lbLabel"></strong><span>← → switch · space = original · click = zoom · Esc close</span></div>
+  <div class="lb-img" id="lbBox"><img id="lbImg" alt=""></div>
+</div>
+
+<script>
+const DATA = JSON.parse(atob("__DATA__"));
+const KEY = "blind-bench:" + DATA.run;
+let state = { cur: 0, ranks: {}, ai: {}, notes: {} };
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s) state = { ...state, ...s }; } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+const $ = (id) => document.getElementById(id);
+const caseAt = (i) => DATA.cases[i];
+const order = (c) => state.ranks[c.id] || [];
+const done = (c) => order(c).length === c.cands.length;
+const aiSet = (c) => state.ai[c.id] || [];
+
+function render() {
+  const c = caseAt(state.cur);
+  $("title").textContent = `Case ${state.cur + 1}/${DATA.cases.length} · ${c.id}`;
+  $("orig").src = c.original;
+  $("prompt").textContent = c.prompt;
+  $("note").value = state.notes[c.id] || "";
+  $("prev").disabled = state.cur === 0;
+  $("next").disabled = state.cur === DATA.cases.length - 1;
+  $("reveal").disabled = !DATA.cases.every(done);
+  $("dots").innerHTML = DATA.cases.map((x, i) =>
+    `<button class="dot ${done(x) ? "done" : ""} ${i === state.cur ? "cur" : ""}" data-i="${i}" title="${x.id}"></button>`).join("");
+  const ord = order(c);
+  $("grid").innerHTML = c.cands.map((cd, i) => {
+    const r = ord.indexOf(cd.label);
+    const ai = aiSet(c).includes(cd.label);
+    return `<div class="card ${r >= 0 ? "ranked" : ""}">
+      <img src="${cd.src}" data-i="${i}" alt="Option ${cd.label}" loading="lazy">
+      <div class="badge">${r >= 0 ? r + 1 + "." : cd.label}</div>
+      ${ai ? '<div class="ai">looks AI</div>' : ""}
+      <div class="bar">
+        <button data-pick="${cd.label}">${r >= 0 ? "Remove " + cd.label : "Pick " + cd.label}</button>
+        <button data-ai="${cd.label}" class="${ai ? "on" : ""}">Looks AI</button>
+      </div></div>`;
+  }).join("");
+}
+
+function pick(label) {
+  const c = caseAt(state.cur);
+  const ord = order(c).slice();
+  const i = ord.indexOf(label);
+  if (i >= 0) ord.splice(i, 1); else ord.push(label);
+  state.ranks[c.id] = ord; save(); render();
+  if (done(c) && state.cur < DATA.cases.length - 1 && i < 0) setTimeout(() => go(state.cur + 1), 450);
+}
+function toggleAi(label) {
+  const c = caseAt(state.cur);
+  const s = new Set(aiSet(c));
+  s.has(label) ? s.delete(label) : s.add(label);
+  state.ai[c.id] = [...s]; save(); render();
+}
+function go(i) { state.cur = Math.max(0, Math.min(DATA.cases.length - 1, i)); save(); render(); window.scrollTo(0, 0); }
+
+/* lightbox */
+let lbIdx = -1;
+function openLb(i) { lbIdx = i; showLb(); $("lb").classList.add("open"); }
+function showLb(orig) {
+  const c = caseAt(state.cur);
+  if (orig || lbIdx < 0) { $("lbImg").src = c.original; $("lbLabel").textContent = "Original"; return; }
+  const cd = c.cands[lbIdx];
+  $("lbImg").src = cd.src; $("lbLabel").textContent = "Option " + cd.label;
+}
+function closeLb() { $("lb").classList.remove("open"); $("lbBox").classList.remove("zoom"); }
+
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  if (t.dataset.pick) pick(t.dataset.pick);
+  else if (t.dataset.ai) toggleAi(t.dataset.ai);
+  else if (t.classList.contains("dot")) go(+t.dataset.i);
+  else if (t.tagName === "IMG" && t.dataset.i !== undefined && !$("lb").contains(t)) openLb(+t.dataset.i);
+  else if (t === $("orig")) openLb(-1);
+});
+$("lbBox").addEventListener("click", () => $("lbBox").classList.toggle("zoom"));
+document.addEventListener("keydown", (e) => {
+  const lb = $("lb").classList.contains("open");
+  const n = caseAt(state.cur).cands.length;
+  if (e.target.tagName === "TEXTAREA") return;
+  if (lb) {
+    if (e.key === "Escape") closeLb();
+    else if (e.key === "ArrowRight") { lbIdx = (lbIdx + 1) % n; showLb(); }
+    else if (e.key === "ArrowLeft") { lbIdx = (lbIdx - 1 + n) % n; showLb(); }
+    else if (e.key === " ") { e.preventDefault(); if (!e.repeat) showLb(true); }
+    return;
+  }
+  const L = e.key.toUpperCase();
+  if (caseAt(state.cur).cands.some((c) => c.label === L)) pick(L);
+  else if (e.key === "ArrowRight") go(state.cur + 1);
+  else if (e.key === "ArrowLeft") go(state.cur - 1);
+});
+document.addEventListener("keyup", (e) => { if (e.key === " " && $("lb").classList.contains("open")) showLb(); });
+$("prev").onclick = () => go(state.cur - 1);
+$("next").onclick = () => go(state.cur + 1);
+$("resetCase").onclick = () => { const c = caseAt(state.cur); delete state.ranks[c.id]; delete state.ai[c.id]; save(); render(); };
+$("note").oninput = (e) => { state.notes[caseAt(state.cur).id] = e.target.value; save(); };
+
+/* resultados */
+function results() {
+  const per = {};
+  const cases = DATA.cases.map((c) => {
+    const ord = order(c), n = c.cands.length;
+    const rows = ord.map((label, r) => {
+      const cd = c.cands.find((x) => x.label === label);
+      const ai = aiSet(c).includes(label);
+      const p = per[cd.model] ||= { model: cd.model, ranks: [], wins: 0, ai: 0, points: 0, cost: 0, sec: 0 };
+      p.ranks.push(r + 1); p.points += n > 1 ? (n - 1 - r) / (n - 1) : 1;
+      if (r === 0) p.wins++; if (ai) p.ai++;
+      p.cost += cd.cost || 0; p.sec += cd.sec || 0;
+      return { rank: r + 1, label, model: cd.model, looks_ai: ai };
+    });
+    return { id: c.id, ranking: rows, note: state.notes[c.id] || "" };
+  });
+  const summary = Object.values(per).map((p) => ({
+    model: p.model, avg_rank: +(p.ranks.reduce((a, b) => a + b, 0) / p.ranks.length).toFixed(2),
+    wins: p.wins, score: Math.round(100 * p.points / p.ranks.length), looks_ai: p.ai,
+    cases: p.ranks.length, avg_cost_usd: +(p.cost / p.ranks.length).toFixed(3), avg_seconds: Math.round(p.sec / p.ranks.length),
+  })).sort((a, b) => b.score - a.score || b.wins - a.wins || a.avg_rank - b.avg_rank);
+  return { run: DATA.run, summary, cases };
+}
+function showResults() {
+  const r = results();
+  $("summary").innerHTML = `<tr><th>#</th><th>Model</th><th>Score (0–100)</th><th>Avg rank</th><th>1st places</th><th>"Looks AI"</th><th>Avg cost</th><th>Avg time</th></tr>` +
+    r.summary.map((s, i) => `<tr class="${i === 0 ? "top" : ""}"><td>${i + 1}</td><td>${s.model}</td><td>${s.score}</td><td>${s.avg_rank}</td><td>${s.wins}/${s.cases}</td><td>${s.looks_ai}</td><td>$${s.avg_cost_usd}</td><td>${s.avg_seconds}s</td></tr>`).join("");
+  $("perCase").innerHTML = r.cases.map((c) => `<p class="label" style="margin-top:18px">${c.id}</p><table>` +
+    c.ranking.map((x) => `<tr><td>#${x.rank}</td><td>${x.label}</td><td>${x.model}</td><td>${x.looks_ai ? "looks AI" : ""}</td></tr>`).join("") +
+    `</table>${c.note ? `<p class="help">Note: ${c.note.replace(/</g, "&lt;")}</p>` : ""}`).join("");
+  $("evalView").classList.add("hidden"); $("resultView").classList.remove("hidden");
+  $("title").textContent = "Results";
+}
+$("reveal").onclick = showResults;
+$("back").onclick = () => { $("resultView").classList.add("hidden"); $("evalView").classList.remove("hidden"); render(); };
+$("download").onclick = () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(results(), null, 2)], { type: "application/json" }));
+  a.download = `results-${DATA.run}.json`; a.click();
+};
+render();
+</script>
+</body>
+</html>

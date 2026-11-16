@@ -1,0 +1,30 @@
+{
+  "scene": "Keep the product EXACTLY as in the reference photo: same shape, same proportions, same toppings in the same spots, same position and scale. Do not redesign it, do not lose any topping. Only the background, the surface and the lighting change. A chocolate brownie on a matte white linen surface.",
+  "subjects": [
+    {
+      "description": "square chocolate brownie, glossy fudge top with visible crackled crust, crumbs on the linen",
+      "position": "center of frame",
+      "action": "resting",
+      "color_palette": [
+        "#3A2318",
+        "#FDFBF7"
+      ],
+      "color_match": "exact"
+    }
+  ],
+  "style": "real photograph, Kodak Portra 400 color science, subtle grain",
+  "color_palette": [
+    "#3A2318",
+    "#FDFBF7",
+    "#FFD9A0"
+  ],
+  "lighting": "diffuse amber window light from the left at about 4600K, the cast is color #FFD9A0, not neutral white, single visible source, soft-edged shadows",
+  "mood": "cozy, calm, homemade",
+  "background": "white textured linen with visible warp and weft threads, individual fibers and tiny loose threads along the folds, no sheen and no synthetic satin smoothness",
+  "composition": "vertical frame, product in the lower third, generous empty fabric above",
+  "camera": {
+    "angle": "slightly above eye level, handheld",
+    "lens": "85mm f/2.8",
+    "depth_of_field": "sharp focus throughout on the product, gentle falloff on the fabric"
+  }
+}

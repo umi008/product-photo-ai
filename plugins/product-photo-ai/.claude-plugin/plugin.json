@@ -1,0 +1,10 @@
+{
+  "name": "product-photo-ai",
+  "description": "Edit and generate photorealistic product photos that don't look AI-made, with Nano Banana 2.1 (default) or FLUX.2 Max via OpenRouter.",
+  "version": "1.0.0",
+  "author": { "name": "umi008" },
+  "homepage": "https://github.com/umi008/product-photo-ai",
+  "repository": "https://github.com/umi008/product-photo-ai",
+  "license": "MIT",
+  "keywords": ["image", "photo", "product-photography", "nano-banana", "flux", "openrouter"]
+}

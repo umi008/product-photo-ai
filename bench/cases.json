@@ -1,0 +1,42 @@
+{
+  "models": [
+    "black-forest-labs/flux.2-max",
+    "black-forest-labs/flux-3-image",
+    "openai/gpt-image-2.6-sunburst",
+    "google/gemini-nano-banana-2.1"
+  ],
+  "cases": [
+    {
+      "id": "table-sun",
+      "refs": [
+        "inputs/table.jpg"
+      ],
+      "format": "auto",
+      "prompt": "Edit this photo. Keep every product EXACTLY as in the reference: same shapes, proportions, positions, scale and camera angle. Do not redesign, add or remove any product. The products are: one two-tier cinnamon roll with white icing drips and a red satin bow on a white board (upper left); exactly six vanilla cupcakes with white piped frosting topped with Lotus biscuits and cinnamon (upper right); one red square box with exactly four chocolate brownies, two with a hazelnut chocolate bonbon and two with a Lotus biscuit (center); two small kraft paper gingerbread-house gift boxes with twine and red doors (lower left and lower right).\n\nOnly change the light: soft low winter morning sunlight from one window just out of frame on the left, the only light source, gently warm color #FFE2B8 around 5000K, not orange and not neutral white. Soft-edged window shadows fall to the right across the white cloth, highlights stay muted. The white cotton cloth shows its real weave, natural folds and small wrinkles, matte with no sheen. Real candid photo taken on a phone, natural grain, cozy homemade feel, no hands in frame."
+    },
+    {
+      "id": "table-christmas",
+      "refs": [
+        "inputs/table.jpg"
+      ],
+      "format": "auto",
+      "prompt": "Edit this photo. Keep every product EXACTLY as in the reference: same shapes, proportions, positions, scale and camera angle. Do not redesign, add or remove any product. The products are: one two-tier cinnamon roll with white icing drips and a red satin bow on a white board (upper left); exactly six vanilla cupcakes with white piped frosting topped with Lotus biscuits and cinnamon (upper right); one red square box with exactly four chocolate brownies, two with a hazelnut chocolate bonbon and two with a Lotus biscuit (center); two small kraft paper gingerbread-house gift boxes with twine and red doors (lower left and lower right).\n\nAdd a few simple, cute Christmas touches on the white cloth only in the empty spaces between products: two small fresh pine sprigs, three cinnamon sticks tied with thin red twine, a couple of star anise and a few dried orange slices. Keep it minimal and homemade, nothing covering the products. Soft low winter sunlight from one window just out of frame on the left, the only light source, gently warm color #FFE2B8 around 5000K, not orange. Soft-edged shadows to the right, muted highlights, white cotton cloth with real weave and folds, matte. Dreamy, airy Pinterest aesthetic, real phone photo with natural grain, no hands in frame."
+    },
+    {
+      "id": "roll-sun",
+      "refs": [
+        "inputs/roll.jpg"
+      ],
+      "format": "auto",
+      "prompt": "Edit this photo. Keep the product EXACTLY as in the reference: one two-tier cinnamon roll with thick white icing drips, the same visible swirls, the same red satin ribbon tied in a bow on top falling down both sides, on the same white board. Same shape, proportions, position, scale and camera angle. Do not redesign it.\n\nOnly change the light and mood: soft late-morning winter sunlight from one window just out of frame on the right, the only light source, gently warm color #FFE2B8 around 5000K, not orange and not neutral white. Delicate soft-edged window-frame shadows across the white curtain behind and the cloth below, a subtle warm glow on the golden crust and the icing, muted highlights. The icing looks like real glaze: slightly translucent at the thin edges, uneven drips. The curtain and cloth are real matte cotton with visible weave and soft folds. Dreamy, airy and calm, real candid phone photo with natural grain, no hands in frame."
+    },
+    {
+      "id": "roll-christmas",
+      "refs": [
+        "inputs/roll.jpg"
+      ],
+      "format": "auto",
+      "prompt": "Edit this photo. Keep the product EXACTLY as in the reference: one two-tier cinnamon roll with thick white icing drips, the same visible swirls, the same red satin ribbon tied in a bow on top falling down both sides, on the same white board. Same shape, proportions, position, scale and camera angle. Do not redesign it.\n\nAdd a few simple, cute Christmas touches: on the cloth beside the board, one small pine sprig, two cinnamon sticks and one star anise; in the far background behind the curtain, a few tiny warm fairy lights completely out of focus as soft round bokeh. Keep it minimal, nothing touching or covering the cinnamon roll. Soft late-morning winter sunlight from one window just out of frame on the right, the only light source, gently warm color #FFE2B8 around 5000K, not orange. Soft-edged shadows, a subtle warm glow on the crust, real slightly translucent icing, matte cotton curtain and cloth with visible weave. Cozy, dreamy Pinterest aesthetic, real candid phone photo with natural grain, no hands in frame."
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+bench/runs/
+__pycache__/
+*.pyc
+.openrouter-key
+.env
+out*.png
